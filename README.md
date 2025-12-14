@@ -26,23 +26,23 @@ When running the FastAPI application with Uvicorn, the host parameter determines
 
 - 127.0.0.1 (localhost)
 
--- Binds the server to the local loopback interface
+    - Binds the server to the local loopback interface
 
--- Accessible only from the same machine
+    - Accessible only from the same machine
 
--- Recommended for standard local development
+    - Recommended for standard local development
 
--- Does not typically trigger firewall warnings
+    - Does not typically trigger firewall warnings
 
 - 0.0.0.0 (all interfaces)
 
--- Binds the server to all network interfaces on the machine (Wi-Fi, Ethernet, virtual adapters)
+    - Binds the server to all network interfaces on the machine (Wi-Fi, Ethernet, virtual adapters)
 
--- Allows access from other devices on the same local network (subject to firewall rules)
+    - Allows access from other devices on the same local network (subject to firewall rules)
 
--- Commonly used for Docker, virtual machines, or LAN testing
+    - Commonly used for Docker, virtual machines, or LAN testing
 
--- May trigger operating system firewall prompts
+    - May trigger operating system firewall prompts
 
 ### Note:
 Binding to 0.0.0.0 does not automatically expose the application to the public internet. External access is still controlled by firewall settings and network configuration.
