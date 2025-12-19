@@ -1,4 +1,4 @@
-# This is a social media backend service
+# This is a FastAPI service
 
 ## ⚠ Development Notes & Troubleshooting
 ### Virtual Environment Activation (Windows)
