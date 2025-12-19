@@ -1,4 +1,5 @@
 from fastapi import FastAPI
+from fastapi import HTTPException
 
 
 app = FastAPI()
@@ -35,7 +36,6 @@ def get_post(post_id: str):
     """
     post = text_posts.get(post_id)
     if post is None:
-        from fastapi import HTTPException
         raise HTTPException(status_code=404, detail="Post not found")
     return post
 
