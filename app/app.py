@@ -1,47 +1,48 @@
 from fastapi import FastAPI, HTTPException
+from app.schemas import ReqBody
 
 
 app = FastAPI()
 
 # Create a python dictionary to store post
 text_posts = {
-    "1": {
+    1: {
         "title": "Morning Motivation",
         "content": "Start your day with purpose and a positive mindset."
     },
-    "2": {
+    2: {
         "title": "Tech Tip",
         "content": "Always validate user input to prevent unexpected bugs."
     },
-    "3": {
+    3: {
         "title": "Daily Reminder",
         "content": "Consistency beats intensity when building long-term habits."
     },
-    "4": {
+    4: {
         "title": "Learning Curve",
         "content": "Mistakes are proof that you are learning something new."
     },
-    "5": {
+    5: {
         "title": "Focus Time",
         "content": "Eliminate distractions to get deep, meaningful work done."
     },
-    "6": {
+    6: {
         "title": "Healthy Living",
         "content": "Drink water regularly and take short breaks to recharge."
     },
-    "7": {
+    7: {
         "title": "Problem Solving",
         "content": "Break complex problems into smaller, manageable pieces."
     },
-    "8": {
+    8: {
         "title": "Creative Spark",
         "content": "Creativity grows when you give yourself permission to experiment."
     },
-    "9": {
+    9: {
         "title": "Career Advice",
         "content": "Learning never stops in a fast-changing professional world."
     },
-    "10": {
+    10: {
         "title": "Evening Reflection",
         "content": "Review your day and acknowledge even the smallest wins."
     }
@@ -81,3 +82,21 @@ def get_post(post_id: str):
         raise HTTPException(status_code=404, detail="Post not found")
     return post
 
+# POST endpoint -> create a new post
+@app.post("/posts")
+def create_post(req_body: ReqBody):
+    """
+    Create a new post with the given request body.
+
+    Args:
+        req_body (ReqBody): The request body containing title and content.
+
+    Actions:
+        Adds a new post to the `text_posts` dictionary with a unique post ID.
+
+    Returns:
+        dict: A success message indicating the post was created.
+    """
+    post_id = max(text_posts.keys()) + 1
+    text_posts[post_id] = {"title": req_body.title, "content": req_body.content}
+    return {"message": "Post created successfully"}
