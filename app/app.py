@@ -1,5 +1,5 @@
 from fastapi import FastAPI, HTTPException
-from app.schemas import ReqBody
+from app.schemas import ReqBody, PostResponse
 
 
 app = FastAPI()
@@ -64,12 +64,12 @@ def get_all_post(limit: int = None):
 
 # GET endpoint -> returns a specific post by id
 @app.get("/posts/{post_id}")
-def get_post(post_id: str):
+def get_post(post_id: int)->PostResponse:
     """
     Retrieve a specific post by its ID.
 
     Args:
-        post_id (str): The ID of the post to retrieve.
+        post_id (int): The ID of the post to retrieve.
 
     Returns:
         dict: The post data corresponding to the given post ID.
@@ -84,7 +84,7 @@ def get_post(post_id: str):
 
 # POST endpoint -> create a new post
 @app.post("/posts")
-def create_post(req_body: ReqBody):
+def create_post(req_body: ReqBody)->PostResponse:
     """
     Create a new post with the given request body.
 
@@ -97,6 +97,7 @@ def create_post(req_body: ReqBody):
     Returns:
         dict: A success message indicating the post was created.
     """
-    post_id = max(text_posts.keys()) + 1
-    text_posts[post_id] = {"title": req_body.title, "content": req_body.content}
-    return {"message": "Post created successfully"}
+    new_post_id = max(text_posts.keys()) + 1
+    new_post = {"title": req_body.title, "content": req_body.content}
+    text_posts[new_post_id] = new_post
+    return new_post
