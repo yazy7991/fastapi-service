@@ -12,11 +12,12 @@ The activation command for a Python virtual environment depends on the shell bei
 #### Solution
 Switch to the appropriate shell environment and use the corresponding activation command:
 
-- Command Prompt: venv\Scripts\activate
+- Command Prompt: `venv\Scripts\activate`
 
-- Powershell: .\venv\Scripts\Activate.ps1
 
-- GitBash/WSL: source venv/Scripts/activate
+- Powershell: `.\venv\Scripts\Activate.ps1`
+
+- GitBash/WSL: `source venv/Scripts/activate`
 
 After activating the virtual environment correctly, all dependencies were resolved and the application ran as expected.
 
