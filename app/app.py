@@ -1,8 +1,18 @@
 from fastapi import FastAPI, HTTPException
 from app.schemas import ReqBody, PostResponse
+from app.db import Post,create_db_and_tables, get_async_session
+from sqlalchemy.ext.asyncio import AsyncSession
+from contextlib import asynccontextmanager
+
+@asynccontextmanager
+async def lifespan(app: FastAPI):
+    # Startup: create database and tables
+    await create_db_and_tables()
+    yield
+    # Shutdown: any cleanup can be done here if necessary  
 
 
-app = FastAPI()
+app = FastAPI(lifespan=lifespan)
 
 # Create a python dictionary to store post
 text_posts = {
