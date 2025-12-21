@@ -106,3 +106,20 @@ async def get_feed(session: AsyncSession = Depends(get_async_session)):
         )
     
     return {"posts": posts_data} # Return the list of posts
+
+# Endpoint to delete a post by ID
+@app.delete("/posts/{post_id}")
+async def delete_post(post_id: str, session: AsyncSession = Depends(get_async_session)):
+    try:
+        post_uuid = uuid.UUID(post_id) # Convert string ID to UUID
+        result = await session.execute(select(Post).where(Post.id == post_uuid)) # Query to find the post by ID
+        post = result.scalars().first() # Get the first matching post
+
+        if not post:
+            raise HTTPException(status_code=404, detail="Post not found") # Raise 404 if post not found
+        await session.delete(post) # Delete the post from the session/database
+        await session.commit() # Commit the transaction to save changes to the database
+
+        return {"success": True, "detail": "Post deleted successfully"} # Return success message
+    except Exception as e:
+        raise HTTPException(status_code=500, detail="Invalid post ID format") # Raise 400 if the ID format is invalid
