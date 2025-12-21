@@ -10,17 +10,31 @@ import os
 import uuid
 import tempfile
 
+"""
 @asynccontextmanager
 async def lifespan(app: FastAPI):
     # Startup: create database and tables
     await create_db_and_tables()
     yield
-    # Shutdown: any cleanup can be done here if necessary  
+    # Shutdown: any cleanup can be done here if necessary
+""" 
 
+@asynccontextmanager
+async def lifespan(app: FastAPI):
+    try:
+        print("Starting app...")
+        await create_db_and_tables()
+        print("Database initialized.")
+        yield
+    except Exception as e:
+        print("Error during startup:", e)
+        raise
+    finally:
+        print("Shutting down app...")
 
 app = FastAPI(lifespan=lifespan)# Initialize FastAPI app with lifespan context manager
 
-# Endpoint to upload a file
+# Endpoint to upload a file 
 @app.post("/upload")
 async def upload_file(
     caption: str = Form(""), # Caption via form data. The form data is one of the many ways of sending data to an endpoint.
@@ -34,13 +48,16 @@ async def upload_file(
         with tempfile.NamedTemporaryFile(delete=False, suffix=os.path.splitext(file.filename)[1]) as temp_file:
             shutil.copyfileobj(file.file, temp_file)
             temp_file_path = temp_file.name
-        # Upload the file to ImageKit
-        upload_result = imagekit.upload(
-            file=open(temp_file_path, "rb"),
-            file_name=file.filename,
-            use_unique_file_name=True,
-            tags=["backend-upload"],
-        )
+        
+        
+        # Upload file to ImageKit
+        with open(temp_file_path, "rb") as f:
+            upload_result = imagekit.files.upload(
+                file=f,
+                file_name=file.filename,
+                folder="/uploads",
+                tags=["backend-upload"]
+            )
 
 
         # Create a new Post record in the database SQLite ORM 
