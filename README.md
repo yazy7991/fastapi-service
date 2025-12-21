@@ -21,6 +21,63 @@ Switch to the appropriate shell environment and use the corresponding activation
 
 After activating the virtual environment correctly, all dependencies were resolved and the application ran as expected.
 
+## FastAPI Lifespan Causing Uvicorn to Exit
+When using a custom `lifespan` context manager in FastAPI like this:
+
+```python
+@asynccontextmanager
+async def lifespan(app: FastAPI):
+    # Startup: create database and tables
+    await create_db_and_tables()
+    yield
+    # Shutdown: any cleanup can be done here if necessary  
+
+
+app = FastAPI(lifespan=lifespan)# Initialize FastAPI app with lifespan context manager
+```
+and running the app with: `uvicorn app.app:app --reload`, the server starts but immediately shuts down, and the reload functionality does not work.
+
+### cause
+
+The lifespan function completes immediately after yield, so Uvicorn thinks the app finished and exits.
+
+### solution
+
+There are two ways to fix this:
+- Proper asynccontextmanager with shutdown handling
+
+```python
+from contextlib import asynccontextmanager
+from fastapi import FastAPI
+from app.db import create_db_and_tables
+
+@asynccontextmanager
+async def lifespan(app: FastAPI):
+    # Startup: create tables
+    await create_db_and_tables()
+    print("Database initialized. App is starting...")
+    try:
+        yield  # Keep app running while serving requests
+    finally:
+        # Optional cleanup on shutdown
+        print("App is shutting down...")
+
+app = FastAPI(lifespan=lifespan)
+```
+- Use FastAPI startup events (simpler)
+
+```python
+from fastapi import FastAPI
+from app.db import create_db_and_tables
+
+app = FastAPI()
+
+@app.on_event("startup")
+async def startup():
+    await create_db_and_tables()
+    print("Database initialized.")
+```
+
 ## 🌐 Networking Note: 0.0.0.0 vs 127.0.0.1
 
 When running the FastAPI application with Uvicorn, the host parameter determines how the server is exposed:

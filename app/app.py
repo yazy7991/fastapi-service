@@ -2,7 +2,6 @@ from fastapi import FastAPI, HTTPException, File, UploadFile, Form, Depends
 from app.schemas import ReqBody, PostResponse
 from app.db import Post,create_db_and_tables, get_async_session
 from app.images import imagekit
-from imagekitio.models.UploadFileRequestoptions import UploadFileRequestOptions
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy import select
 from contextlib import asynccontextmanager
@@ -35,29 +34,27 @@ async def upload_file(
         with tempfile.NamedTemporaryFile(delete=False, suffix=os.path.splitext(file.filename)[1]) as temp_file:
             shutil.copyfileobj(file.file, temp_file)
             temp_file_path = temp_file.name
-        upload_result = imagekit.upload_file(
+        # Upload the file to ImageKit
+        upload_result = imagekit.upload(
             file=open(temp_file_path, "rb"),
             file_name=file.filename,
-            options=UploadFileRequestOptions(
-                use_unique_file_name=True,
-                tags=["backend-upload"]
-            )
+            use_unique_file_name=True,
+            tags=["backend-upload"],
         )
 
-        if upload_result.status_code == 200:
 
-            # Create a new Post record
-            new_post = Post(
-                caption=caption,
-                url=upload_result.url,  # In a real app, you'd store the file and get its URL
-                file_type="video" if file.filename.endswith(".mp4") else "image",  # Simplified file type determination
-                file_name=upload_result.name,  # Use the name returned by ImageKit
-            )
-            
-            session.add(new_post) # Add the new post to the session/database. The function add works like add in git where it stages the changes to be committed
-            await session.commit() # Commit the transaction to save changes to the database
-            await session.refresh(new_post) # Refresh the instance to get updated data from the database
-            return new_post # Return the created post data
+        # Create a new Post record in the database SQLite ORM 
+        new_post = Post(
+            caption=caption,
+            url=upload_result.url,  # In a real app, you'd store the file and get its URL
+            file_type="video" if file.filename.endswith(".mp4") else "image",  # Simplified file type determination
+            file_name=upload_result.name,  # Use the name returned by ImageKit
+        )
+        
+        session.add(new_post) # Add the new post to the session/database. The function add works like add in git where it stages the changes to be committed
+        await session.commit() # Commit the transaction to save changes to the database
+        await session.refresh(new_post) # Refresh the instance to get updated data from the database
+        return new_post # Return the created post data
         
         
 
